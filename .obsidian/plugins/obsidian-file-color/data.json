@@ -1,0 +1,100 @@
+{
+  "cascadeColors": false,
+  "colorBackground": false,
+  "palette": [
+    {
+      "id": "jMmQHY0UPxaT_a3Jfls8L",
+      "name": "Functionally Done",
+      "value": "#64c466"
+    },
+    {
+      "id": "OEIXFvR_SYKUFsxP48-tC",
+      "name": "Needs Work",
+      "value": "#f7ce46"
+    },
+    {
+      "id": "kOPHKoqIxd1EEX771bDh1",
+      "name": "Reformatted!",
+      "value": "#53007e"
+    },
+    {
+      "id": "_-Ut85s5GGgUs5yVbj_8I",
+      "name": "That’s all right",
+      "value": "#e63b7a"
+    }
+  ],
+  "fileColors": [
+    {
+      "path": "Service/MetadataExtractor",
+      "color": "jMmQHY0UPxaT_a3Jfls8L"
+    },
+    {
+      "path": "Utility/MetadataParser",
+      "color": "jMmQHY0UPxaT_a3Jfls8L"
+    },
+    {
+      "path": "Service/FileHandlerManager",
+      "color": "jMmQHY0UPxaT_a3Jfls8L"
+    },
+    {
+      "path": "Model/NodeBinder/methods",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Model/MetadataEntity/methods",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Handler/DocXFileHandler/methods/extractMetadata.md",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Handler/PdfFileHandler/methods",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Handler/PdfFileHandler/PdfFileHandler.md",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Handler/PdfFileHandler",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Handler/DocXFileHandler",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Service/FileHandlerManager/methods",
+      "color": "kOPHKoqIxd1EEX771bDh1"
+    },
+    {
+      "path": "Base",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    },
+    {
+      "path": "Handler",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    },
+    {
+      "path": "Utility",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    },
+    {
+      "path": "Service/SettingsManager",
+      "color": "jMmQHY0UPxaT_a3Jfls8L"
+    },
+    {
+      "path": "Service",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    },
+    {
+      "path": "Model/NodeBinder",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    },
+    {
+      "path": "Model",
+      "color": "_-Ut85s5GGgUs5yVbj_8I"
+    }
+  ]
+}

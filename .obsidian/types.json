@@ -1,0 +1,16 @@
+{
+  "types": {
+    "aliases": "aliases",
+    "cssclasses": "multitext",
+    "tags": "tags",
+    "steps": "multitext",
+    "Dependencies": "multitext",
+    "extends": "multitext",
+    "attributes": "multitext",
+    "methods": "multitext",
+    "parameters": "multitext",
+    "log": "multitext",
+    "performance_considerations": "multitext",
+    "exceptions": "multitext"
+  }
+}
