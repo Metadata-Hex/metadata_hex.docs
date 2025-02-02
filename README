@@ -1,0 +1,30 @@
+# **Metadata Hex Documentation**
+
+This repository contains the documentation for **Metadata Hex**, a Drupal module that enables metadata extraction, processing, and association with Drupal entities.
+
+## **Overview**
+Metadata Hex provides:
+- Automated **metadata extraction** from PDFs and other file formats.
+- Dynamic **field mapping** between extracted metadata and Drupal entities.
+- **Batch processing** for bulk metadata ingestion.
+- **Configurable settings** for extraction rules, file handling, and node processing.
+
+## **Contents - WORK IN PROGRESS**
+📂 **docs/** – Module documentation, setup guides, and usage details.  
+📂 **examples/** – Code snippets and example configurations.  
+📂 **api/** – API references for extending the module.  
+
+## **Getting Started - WORK IN PROGRESS**
+To explore the documentation, start with the [Introduction](docs/README.md) or browse specific topics:
+
+- [Configuration Guide](docs/configuration.md)
+- [Extending Metadata Hex](docs/extending.md)
+- [Batch Processing](docs/batch-processing.md)
+
+## **Contributing - WORK IN PROGRESS**
+🚀 Contributions are welcome!  
+- Report issues in the [issue tracker](https://github.com/your-repo/issues).  
+- Submit PRs to improve the documentation.  
+
+## **License**
+📝 **MIT License** – Free to use and modify.  
