@@ -36,20 +36,6 @@ performance_considerations:
      */
     abstract public function setFileUri();
 
-**function**
-
-    /**
-     * Method: function
-     */
-    abstract public function function();
-
-**function**
-
-    /**
-     * Method: function
-     */
-    abstract public function function();
-
 **getPluginId**
 
     /**
