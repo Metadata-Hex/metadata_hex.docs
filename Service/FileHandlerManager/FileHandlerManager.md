@@ -5,7 +5,9 @@ type: class
 abstract: false
 namespace: Drupal\metadata_hex\Service
 dependencies:
-  - PluginManagerInterface
+  - Drupal\metadata_hex\Plugin\ MetadataHexPluginManager;
+  - Drupal\Component\Plugin\PluginManagerInterface;
+  - Psr\Log\LoggerInterface
 extends: 
 injects: 
 attributes:

@@ -2,11 +2,11 @@
 name: writeMetadata
 description: writes the metadata to a node
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:
-exceptions:
+exceptions: Exception 
 log: 
 ---
 

@@ -2,11 +2,11 @@
 name: loadFromFile
 description: loads and initializes an MetadataEntity via a file uri
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: string $file_uri
 returns: 
 dependencies:
-exceptions:
+exceptions: Exception
 log: 
 ---
 

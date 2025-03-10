@@ -5,8 +5,13 @@ type: class
 abstract: false
 namespace: Drupal\metadata_hex\Model
 dependencies:
-  - Drupal\node\Entity\Node
-  - Drupal\file\Entity\File
+  - Drupal\file\Entity\File;
+  - Drupal\metadata_hex\Base\MetadataHexCore;
+  - Drupal\metadata_hex\Model\NodeBinder;
+  - Drupal\metadata_hex\Utility\MetadataParser;
+  - Drupal\node\Entity\Node;
+  - Exception;
+  - Psr\Log\LoggerInterface;
 extends:
   - MetadataHexCore
 injects: 
@@ -20,11 +25,14 @@ attributes:
   - "[[metadataProcessor]]"
 methods:
   - "[[findMatchingTaxonomy]]"
+  - "[[getMetadata]]"
+  - "[[getNodeBinder]]"
+  - "[[getParser]]"
   - "[[loadFromNode]]"
   - "[[loadFromFile]]"
+  - "[[mapMetadata]]"
   - "[[writeMetadata]]"
   - "[[setLocalMetadata]]"
-  - "[[getNodeBinder]]"
 security_considerations: 
 performance_considerations:
 ---

@@ -2,7 +2,7 @@
 name: loadFromNode
 description: loads and initializes an MetadataEntity via a nid
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: string _nid
 returns: bool $was_file_found
 dependencies:

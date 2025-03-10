@@ -2,55 +2,73 @@
 
 namespace Drupal\metadata_hex\Model;
 
-use Drupal\Core\Database\Database;
 use Drupal\file\Entity\File;
 use Drupal\metadata_hex\Base\MetadataHexCore;
-use Drupal\metadata_hex\Service\FileHandlerManager;
+use Drupal\metadata_hex\Model\NodeBinder;
+use Drupal\metadata_hex\Utility\MetadataParser;
 use Drupal\node\Entity\Node;
 use Exception;
 use Psr\Log\LoggerInterface;
 
+
 /**
- * Class NodeBinder
+ * Class MetadataEntity
  *
- * Encapsulates the object and functionality tied to nodes.
+ * Encapsulates the node, metadata, and file connection.
  */
-class NodeBinder extends MetadataHexCore
+class MetadataEntity extends MetadataHexCore
 {
+
   /**
-   * The UUID associated with this NodeBinder object.
+   * Flag to prevent overwriting existing data.
    *
-   * @var string|null
+   * @var bool
    */
-  protected $uuid = null;
+  protected $dataProtected = true;
 
   /**
-   * The node ID associated with this NodeBinder object.
+   * Metadata that has been cleaned, processed, and matched to fields.
    *
-   * @var int|null
+   * @var array
    */
-  protected $nid = null;
+  protected $metadataMapped = [];
 
   /**
-   * The file ID associated with this file object.
+   * Metadata that has been cleaned, processed, and matched to fields.
    *
-   * @var int|null
+   * @var array
    */
-  protected $fid = null;
+  protected $metadataProcessed = [];
 
   /**
-   * File manager service to ingest files
-   * @var FileHandlerManager
+   * Raw metadata extracted directly from the file.
+   *
+   * @var array
    */
-  protected $fileHandlerManager;
+  protected $metadataRaw = [];
 
   /**
-   * MetadataHex Settings Manager
-   * @var
+   * The NodeBinder associated with this MetadataEntity object.
+   *
+   * @var NodeBinder
    */
-  protected $settingsManager;
+  protected $nodeBinder;
+
   /**
-   * Constructs the NodeBinder class.
+   * Summary of metadataParser
+   * @var MetadataParser
+   */
+  protected $metadataParser = null;
+
+  /**
+   * Flag to prevent overwriting the title.
+   *
+   * @var bool
+   */
+  protected $titleProtected = true;
+
+  /**
+   * Constructs the MetadataEntity class.
    *
    * @param LoggerInterface $logger
    *   The logger service.
@@ -58,22 +76,10 @@ class NodeBinder extends MetadataHexCore
   public function __construct(LoggerInterface $logger)
   {
     parent::__construct($logger);
-    $this->uuid = $this->generateUuid();
-    $this->fileHandlerManager = \Drupal::service('metadata_hex.file_handler_manager');
-    $this->settingsManager = new \Drupal\metadata_hex\Service\SettingsManager();
   }
 
-  public function generateUuid()
-  {
-    return \Drupal::service('uuid')->generate();
-  }
-
-  public function getUuid()
-  {
-    return $this->uuid;
-  }
   /**
-   * Initializes the NodeBinder with a file or node input.
+   * Initializes the MetadataEntity with a file or node input.
    *
    * @param mixed $input
    *   The input entity (either File or Node).
@@ -82,381 +88,312 @@ class NodeBinder extends MetadataHexCore
    *   If the input is invalid.
    */
   public function init($input)
-  {    
-    if (is_string($input)){
-      $input = $this->initNode($input); 
-    }
-    elseif ($input instanceof File) {
-      $this->fid = $input->id();
-      $file = $input;
-      $input = $this->initNode($file->getFileUri()); 
-    }
-    if ($input instanceof Node) {
-      $this->nid = $input->id();
+  {
+    // ingest the input depending on what it is
+    if (is_string($input)) {
+      $this->loadFromFile($input);
+    } elseif ($input instanceof File) {
+      $this->loadFromFile($input->getFileUri());
+    } elseif ($input instanceof Node) {
+      $this->loadFromNode($input->id());
     } else {
       throw new \InvalidArgumentException("Invalid input provided.");
     }
+
+    // setup the parser
+    $this->metadataParser = new MetadataParser($this->logger, $this->getNodeBinder($input)->getBundleType());
   }
 
   /**
-   * Retrieves file URIs from a node.
+   * public initialize
+   * @param mixed $input
+   * @return void
+   */
+  public function initialize($input)
+  {
+    $this->init($input);
+  }
+
+  /**
+   * Returns an instance of MetadataParser. If it hasnt been initialized yet, init it
+   *
+   * @return MetadataParser
+   */
+  public function getParser(): MetadataParser
+  {
+    if ($this->metadataParser === null) {
+      $this->metadataParser = new MetadataParser($this->logger, $this->getNodeBinder()->getBundleType());
+    }
+
+    return $this->metadataParser;
+  }
+
+  /**
+   * Matches a passed-in string to available bundle taxonomy.
+   *
+   * @param string $term_to_find
+   *   The term to find.
+   *
+   * @param string $vid
    *
    * @return array
-   *   An array of file URIs.
+   *   The matching taxonomy IDs.
+   *
+   * @throws Exception
+   *   If the input is not a string.
    */
-  public function getFileUris(): array
+  protected function findMatchingTaxonomy(string $term_to_find, $vid): array
   {
-    if (!$this->nid) {
-      return [];
+    // only strings are allowed
+    if (!is_string($term_to_find)) {
+      throw new Exception("Invalid input. Expected a string.");
     }
 
-    $node = Node::load($this->nid);
-    if (!$node) {
-      return [];
-    }
+    $term_to_find = strtolower($term_to_find);
+    $matching_terms = [];
 
-    $file_uris = [];
+    $terms = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadTree($vid);
 
-    //parses through all the fields on a node to find and retrieve file uris
-    foreach ($node->getFields() as $field_name => $field) {
-      if ($field->getFieldDefinition()->getType() === 'file') {
-        foreach ($field->getValue() as $file_item) {
-          if ($file_entity = File::load($file_item['target_id'])) {
-            $file_uris[] = $file_entity->getFileUri();
-          }
-        }
+    foreach ($terms as $term) {
+      if (strtolower($term->name) === $term_to_find) {
+        $matching_terms[] = $term->tid;
       }
     }
 
-    return $file_uris;
+    return $matching_terms;
   }
 
   /**
-   * Checks whether the node has been processed.
+   * Loads and initializes a MetadataEntity via a file URI.
    *
-   * @return bool
-   *   TRUE if the node has been processed, FALSE otherwise.
-   */
-  public function getIsNodeProcessed(): bool
-  {
-    if (!$this->nid) {
-      return false;
-    }
-
-    $query = (bool) \Drupal::database()->select('metadata_hex_processed', 'mhp')
-      ->fields('mhp', ['processed'])
-      ->condition('entity_id', $this->nid)
-      ->execute()
-      ->fetchField();
-
-    return $query;
-  }
- /**
- * Checks whether the node has been processed in the last 3 minutes.
- *
- * @return bool
- *   TRUE if the node's last_modified timestamp is less than 3 minutes old, FALSE otherwise.
- */
-public function getWasNodeJustProcessed(): bool
-{
-  if (!$this->nid) {
-    return false;
-  }
-  try {
-    $query = \Drupal::database()->select('metadata_hex_processed', 'mhp')
-      ->fields('mhp', ['last_modified'])
-      ->condition('entity_id', $this->nid)
-      ->execute()
-       ->fetchField();
-    } catch (\Exception $e) {
-      return false;
-    }
-
-  if ($query) {
-    $lastModifiedTime = strtotime($query);
-    $currentTime = time();
-    return ($currentTime - $lastModifiedTime) <= 180;
-  } else {
-    return true; // if query is null, dont let it reprocess
-  }
-}
-
-  /**
-   * Retrieves the node from a given NID.
-   *
-   * @return Node|null
-   *   The loaded node or NULL if not found.
-   */
-  public function getNode(): ?Node
-  {
-    return $this->nid ? Node::load($this->nid) : null;
-  }
-
-  /**
-   * Retrieves the node from a given NID.
-   *
-   * @return string|null
-   *   The loaded node or NULL if not found.
-   */
-  public function getBundleType(): ?string
-  {
-    return $this->getNode()?->bundle();
-  }
-
-  /**
-   * Extracts metadata from the node's associated files.
-   *
-   * @return array
-   *   An array of extracted metadata.
-   */
-  public function ingestNodeFileMeta(): array
-  {
-    $metadata = [];
-
-    if (!$this->nid) {
-      return $metadata;
-    }
-
-    $node = Node::load($this->nid);
-    if (!$node) {
-      return $metadata;
-    }
-
-    // Iterate over all node fields for files
-    foreach ($node->getFields() as $field_name => $field) {
-      $field_definition = $field->getFieldDefinition();
-      $field_type = $field_definition->getType();
-      $target_type = $field_definition->getSetting('target_type') ?? '';
-
-      if ($field_type === 'file' || ($field_type === 'entity_reference' && $target_type === 'file')) {
-        foreach ($field->getValue() as $file_item) {
-          if (!empty($file_item['target_id'])) {
-          // loads the file into a drupal model
-          $file = File::load($file_item['target_id']);
-
-          // assuming it exists, retrieve information
-          if ($file) {
-            $file_uri = $file->getFileUri();
-            $file_extension = pathinfo($file_uri, PATHINFO_EXTENSION);
-            $handler = $this->fileHandlerManager->getHandlerForExtension($file_extension);
-
-            // setup the handler and extract the metadata
-            if ($handler !== null) {
-              $handler->setFileUri($file_uri);
-              $exmd = $handler->extractMetadata();
-
-              $data = [
-                'uri' => $file->getFileUri(),
-                'metadata' => $exmd,
-              ];
-
-              // appends the data in a non-destructive way
-              if (!isset($metadata[$file->id()])) {
-                $metadata[$file->id()] = $data;
-              } else {
-                $metadata[$file->id()] = array_merge($metadata[$file->id()], $data);
-              }
-            } else {
-              $this->logger->error("No extraction handler found for $file_uri");
-            }
-
-          }
-        }
-        }
-      }
-    }
-    return $metadata;
-  }
-
-  /**
-   * Initializes a blank node if no reference is found.
-   *
-   * @param string| int $input
+   * @param string $file_uri
    *   The file URI.
-
    *
-   * @return Node
-   *   The initialized node.
+   * @throws Exception
+   *   If the file is invalid.
    */
-  public function initNode(string|int $input): Node
-  {
-    $bundle_type = $this->settingsManager->getIngestBundleType();
-    $field_name = $this->settingsManager->getIngestField();
-    $file = null;
+  public function loadFromFile(string $file_uri)
+  {      
 
-    if (is_numeric($input)){
-      $file  = File::load($input);
-    } else if (is_string($input)){
-      $file = \Drupal::entityTypeManager()->getStorage('file')->loadByProperties(['uri' => $input]);
-      $file = reset($file);
-
-      if (empty($file)) {
-        $file = File::create(['uri' => $input]);
-        $file->save();
-      }
-    } else if ($input instanceof File){
-      $file = $input;
-    }
-
-    if (empty($file) && !($file instanceof File)) {
-      throw new \InvalidArgumentException("Invalid input provided.");
-    }
-
-    $query = \Drupal::entityQuery('node')
-    ->condition('type', $bundle_type)
-    ->condition($field_name, $file->id())
-    ->accessCheck(FALSE) // Skip access check in programmatic queries.
+  $fid = \Drupal::entityQuery('file')
+    ->condition('uri', $file_uri)
+    ->accessCheck(false)
     ->execute();
-    
-    if (!empty($query)) {
-      $nid = reset($query);
-      $node = Node::load($nid);
-      return $node;
+
+    // Ensure we get the first result (if any)
+    $fid = reset($fid);
+
+    if ($fid) {
+        $file = File::load($fid);
+    } else {
+      // MAKE A NEW FILE
+      $file = File::create(['uri' => $file_uri]);
+      $file->save();
     }
 
-    $node = Node::create([
-      'type' => $bundle_type,
-      'status' => 0,
-      'title' => 'Generated Node',
-    ]);
-
-    // attach the file to the specified field and save
-    if ($field_name && $node->hasField($field_name)) { 
-      $node->set($field_name, ['target_id' => $file->id()]);
+    if (!$file) {
+      throw new Exception("File not found: $file_uri");
     }
 
-    $node->save();
-    return $node;
+    // Ingest and set the raw metadata
+    $tmd = $this->getNodeBinder($file)->ingestNodeFileMeta(); //
+    $this->setLocalMetadata($tmd);
+
+    // cleans up and parses the metadata and sets
+    $mtdt = $this->getParser()->cleanMetadata($this->metadataRaw);
+    $this->mapMetadata($mtdt);
+    $this->setLocalMetadata($this->metadataMapped, false);
   }
 
   /**
-   * Saves the node after validation.
+   * Returns an instance of NodeBinder. Initializes if unset
    *
-   * @return void
-   *
+   * @return NodeBinder
    */
-  public function save()
+  public function getNodeBinder($nodefile = null)
   {
-    if (!$this->nid) {
-      return;
+    // init if its not initalized
+    if ($this->nodeBinder === null) {
+      $this->nodeBinder = new NodeBinder($this->logger);
     }
 
-    $node = Node::load($this->nid);
+    // if we aren't passing a nodefile in, just return the nodeBinder
+    if ($nodefile === null) {
+      return $this->nodeBinder;
+    }
+
+    // if we DID pass a nodefile in, init the nodeBinder and pass it back
+    $this->nodeBinder->init($nodefile);
+    return $this->nodeBinder;
+  }
+
+  /**
+   * Loads and initializes a MetadataEntity via a node ID.
+   *
+   * @param string $nid
+   *   The node ID.
+   *
+   * @throws Exception
+   *   If the node is invalid.
+   */
+  public function loadFromNode(string $nid)
+  {
+    $node = Node::load($nid);
+
     if (!$node) {
+      throw new Exception("Node not found: $nid");
+    }
+
+    // Ingests the metadata and sets
+    $tmd = $this->getNodeBinder($node)->ingestNodeFileMeta();
+    $this->setLocalMetadata($tmd);
+
+    // cleans up and parses the metadata and sets
+    $mtdt = $this->getParser()->cleanMetadata($this->metadataRaw);
+    $this->mapMetadata($mtdt);
+    $this->setLocalMetadata($this->metadataMapped, false);
+  }
+
+  /**
+   * Sets the local metadata arrays.
+   *
+   * @param array $metadata
+   * @param mixed $raw
+   * @return void
+   */
+  public function setLocalMetadata(array $metadata, $raw = true)
+  {
+    if ($raw) {
+      $this->metadataRaw = array_merge($this->metadataRaw, $metadata);
+    } else {
+      $this->metadataProcessed = array_merge($this->metadataProcessed, $metadata);
+    }
+  }
+
+  /**
+   * Writes the processed metadata to a node
+   */
+  public function writeMetadata()
+  {
+    // Some may think to default to processed metadata. Perhaps
+    if (empty($this->metadataProcessed)) {
       return;
     }
 
-    // Validate and save the node.
-    $violations = $node->validate();
-    if (count($violations) === 0) {
+    $node = $this->getNodeBinder()->getNode();
+    if (!$node) {
+      throw new Exception("No valid node found for metadata writing.");
+    }
+
+    if (empty($this->metadataMapped)){
+      return;
+    }
+    // iterates over all matching mapped fields
+    foreach ($this->metadataMapped as $field_name => $value) {
+
+      // These should already be filtered out by the parser.
+      if (!$node->hasField($field_name)) {
+        continue;
+      }
+
+      // grab the field info
+      $field_definition = $node->getFieldDefinition($field_name);
+      $field_type = $field_definition->getType();
+
+      switch ($field_type) {
+        case 'string':
+        case 'string_long':
+        case 'text':
+        case 'text_long':
+        case 'text_with_summary':
+          $node->set($field_name, $value);
+          break;
+
+        case 'entity_reference':
+
+          $target_type = $field_definition->getSetting('target_type');
+          $handler_settings = $field_definition->getSetting('handler_settings');
+          $vid = !empty($handler_settings['target_bundles']) ? reset($handler_settings['target_bundles']) : NULL;
+
+          if ($target_type === 'taxonomy_term') {
+            $term_ids = [];
+            foreach (explode(',', $value) as $term_name) {
+              $term_name = trim($term_name);
+              $matching_terms = $this->findMatchingTaxonomy($term_name, $vid);
+              if (empty($matching_terms)) {
+                $term = \Drupal\taxonomy\Entity\Term::create([
+                  'vid' => $vid,
+                  'name' => $term_name,
+                ]);
+                $term->save();
+                $term_ids[] = $term->id();
+              } else {
+                $term_ids = array_merge($term_ids, $matching_terms);
+              }
+            }
+            $node->set($field_name, $term_ids);
+          } else {
+            $node->set($field_name, ['target_id' => $value]);
+          }
+          break;
+
+        case 'boolean':
+        case 'integer':
+          $node->set($field_name, (int) $value);
+          break;
+
+        case 'datetime':
+        case 'timestamp':
+          $node->set($field_name, date('Y-m-d\TH:i:s', strtotime($value)));
+          break;
+
+        case 'list_string':
+          $allowed_values = $field_definition->getSetting('allowed_values');
+
+          if (array_key_exists($value, $allowed_values) || in_array($value, $allowed_values)) {
+            $node->set($field_name, $allowed_values[$value]);
+          $check_value = $node->get($field_name)->value;
+          } else {
+            $this->logger->error("Invalid value '{$value}' for field {$field_name}.");
+          }
+          break;
+
+        default:
+          $this->logger->error("Unhandled field type: {$field_type} for field {$field_name}.");
+          break;
+      }
+    }
+
+
+      $this->getNodeBinder()->setRevision();
+      $this->getNodeBinder()->setProcessed();
       $node->save();
-    } else {
-      foreach ($violations as $violation) {
-        $this->logger->error($violation->getMessage());
+  }
+
+  /**
+   * Consolidates the metadata array to only those items that match the confirmed valid field mappings
+   * @param array $metadata
+   * @return void
+   */
+  public function mapMetadata(array $metadata)
+  {
+    $field_mappings = $this->metadataParser->getFieldMappings();
+
+    foreach ($field_mappings as $drupal_field => $file_field) {
+
+      if (isset($metadata[$file_field]) && !empty($metadata[$file_field])) {
+        $this->metadataMapped[$drupal_field] = $metadata[$file_field];
       }
     }
   }
 
   /**
-   * Sets a field on the node.
-   *
-   * @param string $field_name
-   *   The field name.
-   * @param mixed $value
-   *   The value to set.
-   * @param bool $overwrite
-   *   Whether to overwrite existing values.
+   * Returns the full extracted metadata
+   * 
+   * @return array
    */
-  public function setField(string $field_name, $value, bool $overwrite = true)
-  {
+  public function getMetadata(){
+    return ['mapped' => $this->metadataMapped, 'processed' => $this->metadataProcessed, 'raw' => $this->metadataRaw];
 
-    if (!$this->nid) {
-      return;
-    }
-
-    $node = Node::load($this->nid);
-    if (!$node) {
-      return;
-    }
-
-    // Lets set the field to the new value, ONLY if the target is empty or overwrite is true
-    if ($overwrite || empty($node->get($field_name)->getValue())) {
-      $node->set($field_name, $value);
-      $node->save();
-    }
-  }
-
-  /**
-   * Marks the node as processed.
-   *
-   * @return void
-   *
-   */
-public function setProcessed()
-{
-  if (!$this->nid) {
-    return;
-  }
-  $entity_id = (int) $this->nid;
-  $entity_type = (string) $this->getBundleType();
-  $processed = 1;
-  $ts = (string) date('Y-m-d H:i:s');
-
-  try {
-    $db = Database::getConnection();
-    $query = $db->select('metadata_hex_processed', 'mhp')
-      ->fields('mhp', ['entity_id'])
-      ->condition('entity_id', $entity_id)
-      ->execute()
-      ->fetchField();
-
-    if ($query) {
-      // Update the existing record
-      $db->update('metadata_hex_processed')
-        ->fields([
-          'last_modified' => $ts,
-          'processed' => $processed,
-        ])
-    // Assert that all mapped keys exist in processed metadata
-        ->condition('entity_id', $entity_id)
-        ->execute();
-    } else {
-      // Insert a new record
-      $db->insert('metadata_hex_processed')
-        ->fields([
-          'entity_id' => $entity_id,
-          'last_modified' => $ts,
-          'processed' => $processed,
-        ])
-        ->execute();
-    }
-  } catch (\Exception $e) {
-    // Handle the exception as needed
-  }
-}
-
-  /**
-   * Sets a revision message when updating a node.
-   *
-   * @return void
-   *
-   */
-  public function setRevision()
-  {
-    if (!$this->nid) {
-      return;
-    }
-
-    $node = Node::load($this->nid);
-    if (!$node) {
-      return;
-    }
-    $node_type = $this->getBundleType();
-    $revisions_enabled = \Drupal::config("node.type.$node_type")->get('enable_revisions');
-
-    if ($revisions_enabled && $node->isNewRevision()) {
-      $node->setRevisionLogMessage("Updated metadata processing.");
-      $node->save();
-    }
   }
 }

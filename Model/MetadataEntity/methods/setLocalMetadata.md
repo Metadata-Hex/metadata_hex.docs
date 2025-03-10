@@ -2,10 +2,10 @@
 name: setLocalMetadata
 description: sets the local metadata
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 - array $metadata
-- string $destination
+- mixed $raw
 returns: 
 dependencies:
 exceptions:

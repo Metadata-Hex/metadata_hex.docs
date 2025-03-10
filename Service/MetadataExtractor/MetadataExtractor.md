@@ -5,6 +5,9 @@ type: class
 abstract: false
 namespace: Drupal\metadata_hex\Service
 dependencies: 
+  - Drupal\metadata_hex\Utility\MetadataParser as Parser;
+  - Exception;
+  - Psr\Log\LoggerInterface;
 extends:
   - MetadataHexCore
 injects: 
