@@ -2,7 +2,7 @@
 name: extractmetadata
 description: extracts the metadata from a pdf.
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: array $metadata
 dependencies:
