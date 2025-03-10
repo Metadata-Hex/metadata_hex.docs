@@ -2,7 +2,7 @@
 name: setField
 description: sets field data from extracted
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:

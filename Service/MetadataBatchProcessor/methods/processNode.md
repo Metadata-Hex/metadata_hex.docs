@@ -2,7 +2,7 @@
 name: processNode
 description: Processes a node and updates its metadata
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: string $nid
 returns: 
 dependencies:

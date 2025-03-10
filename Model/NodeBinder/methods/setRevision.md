@@ -2,7 +2,7 @@
 name: setRevision
 description: sets the revision message when updating
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:

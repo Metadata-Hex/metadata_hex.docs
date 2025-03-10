@@ -5,32 +5,36 @@ type: class
 abstract: false
 namespace: Drupal\metadata_hex\Handler
 dependencies:
-  - Drupal\Core\Entity\EntityTypeManagerInterface
+  - Drupal\metadata_hex\Base\MetadataHexCore;
+  - Drupal\metadata_hex\Model\MetadataEntity;
+  - Drupal\metadata_hex\Service\MetadataExtractor;
+  - Drupal\metadata_hex\Service\SettingsManager;
+  - Exception;
+  - Psr\Log\LoggerInterface;
 extends:
   - MetadataHexCore
 injects: 
 attributes:
   - "[[bundleType]]"
   - "[[cron]]"
-  file_system
-  files
-  settingsManager
-  - "[[Utility/MetadataParser/attributes/extractor|extractor]]"
-  - "[[pdfFiles]]"
+  - "[[file_system]]"
+  - "[[files]]"
+  - "[[settingsManager]]"
+  - "[[Utility/MetadataParser/attributes/extractor|- extractor]]"
+  - "[[files]]"
   - "[[reprocess]]"
 methods:
   - "[[BatchFinished]]"
   - "[[categorizeFiles]]"
-  - "[[ingestFiles]]"
-  - ingest file
-  process file uri
+  - "[[processFile]]"
+  - "[[processFileUri]]"
   - "[[processFiles]]"
   - "[[processNode]]"
   - "[[processNodes]]"
 security_considerations: 
 performance_considerations:
   - Batch process large directories to avoid memory exhaustion.
-  - Use caching for already processed files to reduce redundant operations.
+  - - caching for already processed files to reduce redundant operations.
   - Limit cron operations to a subset of files to improve runtime efficiency.
 ---
 

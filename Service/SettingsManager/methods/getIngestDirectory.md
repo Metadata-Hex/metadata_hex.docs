@@ -1,6 +1,6 @@
 ---
-name: getIngestField
-description: Retrieves the field to ingest files into
+name: getIngestDirectory
+description: Retrieves the directory to ingest 
 type: method
 visitiblity: protected
 parameters: 

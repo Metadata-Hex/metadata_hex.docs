@@ -1,6 +1,6 @@
 ---
-name: getIngestField
-description: Retrieves the field to ingest files into
+name: getIngesBundleType
+description: Retrieves the bundle type to ingest files into 
 type: method
 visitiblity: protected
 parameters: 

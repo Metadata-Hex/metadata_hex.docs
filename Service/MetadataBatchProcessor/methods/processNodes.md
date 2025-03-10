@@ -2,7 +2,7 @@
 name: processNodes
 description: processes through all nodes of a specific bundle type
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:

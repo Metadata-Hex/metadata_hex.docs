@@ -2,7 +2,7 @@
 name: save
 description: validates and saves the node
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:

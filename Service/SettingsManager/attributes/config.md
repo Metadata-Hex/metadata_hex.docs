@@ -1,8 +1,8 @@
 ---
-name: $configFactory
-description: The factory to fetch config
+name: $config
+description: The config object used to fetch settings
 type: attribute
-attr_type: ConfigFactory
+attr_type: 
 visibility: protected
 default: 
 required: 

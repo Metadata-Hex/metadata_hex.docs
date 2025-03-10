@@ -1,10 +1,10 @@
 ---
-name: getNode
-description: returns the node from a passed nid
+name: getBundleType
+description: returns the node's bundle type
 type: method
 visitiblity: public
 parameters: 
-returns: Node $node
+returns: string $bundleType
 dependencies:
 exceptions:
 logs:

@@ -2,7 +2,7 @@
 name: initNode
 description: Initilizes a blank node if no referenced is found
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: string $pdf_uri, $target-bundle, $field_name?
 returns: Node $node
 dependencies:
@@ -24,4 +24,5 @@ If no node is found
 **Test**
 - Can pass in a uri and receive a blank node in return
 - Does not return a previously created node
+
 

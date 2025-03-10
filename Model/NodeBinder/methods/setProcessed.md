@@ -2,13 +2,14 @@
 name: setProcessed
 description: sets the node as processed
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: 
 dependencies:
 exceptions:
 log:
---- # setProcessed
+--- 
+# setProcessed
 
 **Steps**
 - Verifies node can be loaded from nid

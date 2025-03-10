@@ -11,20 +11,24 @@ dependencies:
   - Drupal\metadata_hex\Service\FileHandlerManager;
   - Drupal\node\Entity\Node;
   - Exception;
-  - Psr\Log\LoggerInterface;extends:
+  - Psr\Log\LoggerInterface;
+extends:
   - MetadataHexCore
 injects: 
 attributes:
   - "[[nid]]"
   - "[[fid]]"
-  uuid
-  settingsManager
-  fileHandlerManager
+  - "[[uuid]]"
+  - "[[settingsManager]]"
+  - "[[fileHandlerManager]]"
 methods:
   - "[[getFileUris]]"
+  - "[[getBundleType]]"
+  - "[[getWasNodeJustProcessed]]"
   - "[[getIsNodeProcessed]]"
   - "[[getNode]]"
   - "[[ingestNodeFileMeta]]"
+  - "[[init]]"
   - "[[InitNode]]"
   - "[[save]]"
   - "[[setField]]"

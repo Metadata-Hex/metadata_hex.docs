@@ -1,9 +1,9 @@
 ---
 name: processFiles
-description: processes through files in a directory
+description: processes through an array of Drupal file Ids, processing each into a node
 type: method
-visitiblity: protected
-parameters: 
+visitiblity: public
+parameters: array $fid
 returns: 
 dependencies:
 exceptions:

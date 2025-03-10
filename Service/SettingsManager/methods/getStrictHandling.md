@@ -1,16 +1,12 @@
 ---
-name: getExtractionSettings
-description: Retrieves extraction settings
+name: getStrictHandling
+description: Retrieves the boolean to decide if the parser should use strict handling
 type: method
 visitiblity: protected
 parameters: 
-returns: array
+returns: bool
 dependencies:
 exceptions:
 log:
 ---
 
-
-**Steps**
-- grab the raw metadata_hex settings
-- Return the settings that apply to extraction

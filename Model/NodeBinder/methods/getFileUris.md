@@ -2,7 +2,7 @@
 name: getFileUris
 description: retrieve file uris from a node
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: array $file_uris
 dependencies:
@@ -22,4 +22,5 @@ log:
 **Test**
 - Can retrieve an array when using a valid bundleType
 - Does not throw an error
+
 

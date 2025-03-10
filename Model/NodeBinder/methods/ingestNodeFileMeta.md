@@ -2,7 +2,7 @@
 name: ingestNodeFileMeta
 description: returns the extracted metadata from a node’s files
 type: method
-visitiblity: protected
+visitiblity: public
 parameters: 
 returns: array $metadata_from_node | void
 dependencies:
@@ -20,4 +20,6 @@ log:
 **Test**
 - Can receive an array of metadata
 - Does not throw an error
+
+
 
