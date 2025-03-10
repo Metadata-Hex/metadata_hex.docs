@@ -13,11 +13,26 @@ attributes:
   - "[[Utility/MetadataParser/attributes/extractor|extractor]]"
   - "[[fieldMapping]]"
   - "[[strictHandling]]"
+  - "[[bundle]]"
+  - "[[flattenKeys]]"
+  - "[[metaArray]]"
+  - "[[entityFileManager]]" 
+  - "[[settingsManager]]"
 methods:
   - "[[cleanMetadata]]"
   - "[[cleanFieldMapping]]"
   - "[[explodeKeyValueString]]"
   - "[[sanitizeArray]]"
+  - "[[setStrictHandling]]"
+  - "[[setFlattenKeys]]"
+  - "[[setAvailableFields]]"
+  - "[[getEntityFieldManager]]"
+  - "[[getAvailableFields]]"
+  - "[[getFieldMappings]]"
+  - "[[flattenArray]]"
+  - "[[loadBundleType]]"
+  - "[[setBundleType]]"
+
 security_considerations: 
 performance_considerations:
 ---

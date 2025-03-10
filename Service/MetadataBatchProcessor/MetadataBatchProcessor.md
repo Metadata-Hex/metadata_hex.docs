@@ -12,6 +12,9 @@ injects:
 attributes:
   - "[[bundleType]]"
   - "[[cron]]"
+  file_system
+  files
+  settingsManager
   - "[[Utility/MetadataParser/attributes/extractor|extractor]]"
   - "[[pdfFiles]]"
   - "[[reprocess]]"
@@ -19,6 +22,8 @@ methods:
   - "[[BatchFinished]]"
   - "[[categorizeFiles]]"
   - "[[ingestFiles]]"
+  - ingest file
+  process file uri
   - "[[processFiles]]"
   - "[[processNode]]"
   - "[[processNodes]]"

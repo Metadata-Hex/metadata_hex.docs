@@ -5,14 +5,21 @@ type: class
 abstract: false
 namespace: Drupal\metadata_hex\Model
 dependencies:
-  - Drupal\node\Entity\Node
-  - Drupal\file\Entity\File
-extends:
+  - Drupal\Core\Database\Database;
+  - Drupal\file\Entity\File;
+  - Drupal\metadata_hex\Base\MetadataHexCore;
+  - Drupal\metadata_hex\Service\FileHandlerManager;
+  - Drupal\node\Entity\Node;
+  - Exception;
+  - Psr\Log\LoggerInterface;extends:
   - MetadataHexCore
 injects: 
 attributes:
   - "[[nid]]"
   - "[[fid]]"
+  uuid
+  settingsManager
+  fileHandlerManager
 methods:
   - "[[getFileUris]]"
   - "[[getIsNodeProcessed]]"

@@ -11,11 +11,25 @@ extends:
 injects: 
 attributes:
   - "[[configFactory]]"
+  - "[[config]]"
+  - "[[DEFAULT_STRICT]]" 
+  - "[[DEFAULT_FLATTEN]]" 
+  - "[[DEFAULT_PROTECT_TITLE]]" 
+  - "[[DEFAULT_PROTECT_DATA]]" 
 methods:
   - "[[getExtractionSettings]]"
   - "[[getFieldMappings]]"
   - "[[getFileIngestSettings]]"
   - "[[getNodeProcessingSettings]]"
+
+  - "[[getIngestField]]" 
+  - "[[getDirectory]]" 
+  - "[[getBundleType]]"
+  - "[[getStrictHandling]]" 
+  - "[[getProtectedData]]" 
+  - "[[getProtectedTitle]]"  
+  - "[[getFlattenKeys]]" 
+  - "[[getAllowedNodeTypes]]"
 security_considerations: 
 performance_considerations:
 ---

@@ -9,12 +9,14 @@ extends:
   - PluginBase implements FileHandlerInterface, ContainerFactoryPluginInterface 
 injects:
 attributes:
-  - "[[process($file_path):]]"
+  - "[[associatedentityIds]]"
+  - "[[field]]"
+  - "[[fileType]]"
+  - "[[fileUri]]"
+  - "[[file_system]]"
 methods:
   - "[[__construct]]"
   - "[[setFileUri]]"
-  - "[[function]]"
-  - "[[function]]"
   - "[[getPluginId]]"
   - "[[getPluginDefinition]]"
   - "[[process]]"

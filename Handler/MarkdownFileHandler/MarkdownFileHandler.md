@@ -1,13 +1,14 @@
 ---
-name: DocxFileHandler
-description: This docx file handler is responsible for ingesting and extracting the metadata
+name: MarkdownFileHandler
+description: This md file handler is responsible for ingesting and extracting the metadata
 type: class
 abstract: false
 namespace: Drupal\metadata_hex\Handler
 dependencies:
-  - PhpOffice\PhpWord\IOFactory
+  - Symphony\YAML
 extends:
   - FileHandler
+  - MetadataHexCore
 injects: 
 attributes: []
 methods:

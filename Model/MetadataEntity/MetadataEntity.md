@@ -13,14 +13,18 @@ injects:
 attributes:
   - "[[dataProtected]]"
   - "[[metadataRaw]]"
+  - "[[metadataMapped]]"
   - "[[metadataProcessed]]"
   - "[[Model/MetadataEntity/attributes/nodeBinder|nodeBinder]]"
   - "[[titleProtected]]"
+  - "[[metadataProcessor]]"
 methods:
   - "[[findMatchingTaxonomy]]"
   - "[[loadFromNode]]"
   - "[[loadFromFile]]"
   - "[[writeMetadata]]"
+  - "[[setLocalMetadata]]"
+  - "[[getNodeBinder]]"
 security_considerations: 
 performance_considerations:
 ---
