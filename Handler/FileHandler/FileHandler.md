@@ -6,44 +6,67 @@ abstract: true
 namespace: Drupal\metadata_hex\Handler
 dependencies: 
 extends:
-  - MetadataHexCore
-injects: 
+  - PluginBase implements FileHandlerInterface, ContainerFactoryPluginInterface 
+injects:
 attributes:
-  - "[[associatedEntityIds]]"
-  - "[[fileId]]"
-  - "[[fileType]]"
-  - "[[fileUri]]"
+  - "[[process($file_path):]]"
 methods:
-  - "[[getFileReferences]]"
-  - "[[GetFileType]]"
-  - "[[IsValidFile]]"
+  - "[[__construct]]"
+  - "[[setFileUri]]"
+  - "[[function]]"
+  - "[[function]]"
+  - "[[getPluginId]]"
+  - "[[getPluginDefinition]]"
+  - "[[process]]"
 security_considerations: 
 performance_considerations:
 ---
 
-
 **__construct**
 
-    public function __construct(string $filePath)
-    {
-        $this->filePath = $filePath;
-        $this->fileType = pathinfo($filePath, PATHINFO_EXTENSION);
-    }
-
-**extractMetadata**
- 
     /**
-     * Extract metadata from the file.
-     * Must be implemented in child classes.
-     * @return array
+     * Method: __construct
      */
-    abstract public function extractMetadata(): array;
+    abstract public function __construct();
 
-**getSuuportedExtentions**
+**setFileUri**
 
     /**
-     * returns the extensions supported.
-     * Must be implemented in child classes.
-     * @return array
+     * Method: setFileUri
      */
-    abstract public function getSupportedExtentions(): array;
+    abstract public function setFileUri();
+
+**function**
+
+    /**
+     * Method: function
+     */
+    abstract public function function();
+
+**function**
+
+    /**
+     * Method: function
+     */
+    abstract public function function();
+
+**getPluginId**
+
+    /**
+     * Method: getPluginId
+     */
+    abstract public function getPluginId();
+
+**getPluginDefinition**
+
+    /**
+     * Method: getPluginDefinition
+     */
+    abstract public function getPluginDefinition();
+
+**process**
+
+    /**
+     * Method: process
+     */
+    abstract public function process();
